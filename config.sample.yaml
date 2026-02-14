@@ -1,0 +1,17 @@
+feeds:
+  - name: All
+    url: https://www.reddit.com/r/all/.rss
+
+  - name: reddit.com (time capsule)
+    url: https://www.reddit.com/r/reddit.com/.rss
+
+  - name: Python
+    url: https://www.reddit.com/r/python/.rss
+
+  - name: Linux
+    url: https://www.reddit.com/r/linux/.rss
+
+  - name: Programming
+    url: https://www.reddit.com/r/programming/.rss
+
+theme: default

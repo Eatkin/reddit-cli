@@ -1,0 +1,87 @@
+Screen {
+    background: black;
+    color: white;
+    height: 100%;
+    width: 100%;
+}
+
+#ascii-art {
+    text-align: center;
+    color: cyan;
+    padding: 1 0;
+}
+
+#footer {
+    text-align: center;
+    color: green;
+}
+
+.header { 
+    padding: 0 0 1 0;
+}
+
+.footer { 
+    padding: 1 0 0 0;
+}
+
+.list-view-state {
+    background: black;
+}
+
+/* For dealing with lists of threads */
+.post-row {
+    height: 1;
+}
+
+.col-emoji {
+    width: 3;
+}
+
+.col-subreddit {
+    width: 14;
+    color: cyan;
+}
+
+.col-title {
+    width: 1fr;
+}
+
+.col-meta {
+    width: 8;
+    color: grey;
+}
+
+/* Post viewer page */
+.post-detail-body {
+    height: 100%;
+    width: 100%;
+    padding: 1 2;
+}
+
+.nostyle {
+    display: none;
+}
+
+.post-image {
+    height: auto;
+    max-width: 80%;
+    max-height: 50%;
+    align: center middle;
+    content-align: center middle;
+    margin: 1 0;
+}
+
+.post-image-container {
+    align: center top;
+    padding: 1 0;
+}
+
+.post-content-body {
+    padding: 0;
+}
+
+.post-image-url {
+    text-style: italic;
+    align: center middle;
+    padding: 1 0;
+}
