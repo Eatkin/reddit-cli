@@ -10,6 +10,16 @@ Current state: functional.
 
 ---
 
+## Getting Your RSS Feed
+
+Reddit provides a personal RSS feed for your subreddit subscriptions.
+
+You can find them on the [feeds page](https://www.reddit.com/prefs/feeds).
+
+These are private feeds with an access token and the link should not be shared as the token can never be revoked.
+
+---
+
 ## Quick Start
 
 ### Prerequisites
