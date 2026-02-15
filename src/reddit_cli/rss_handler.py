@@ -2,6 +2,10 @@ import re
 import textwrap
 from typing import Dict, List
 from typing import Optional
+from urllib.parse import urlparse
+from urllib.parse import parse_qs
+from urllib.parse import urlencode
+from urllib.parse import urlunparse
 
 import feedparser
 import requests
@@ -14,9 +18,13 @@ class RSSHandler:
     FEED_CACHE: Dict[str, List[RedditPost]] = {}
 
     def __init__(self, feed_url: str, force_reload: bool=False, limit: int = 100) -> None:
-        if '?limit' not in feed_url:
-            feed_url += f"?limit={limit}"
-        self.feed_url = feed_url
+        # Parse and rebuild url with limit param
+        parsed = urlparse(feed_url)
+        query = parse_qs(parsed.query)  
+        query['limit'] = [str(limit)]
+        new_query = urlencode(query, doseq=True)
+        self.feed_url = urlunparse(parsed._replace(query=new_query))
+
         self.raw_feed = None
         self.feed = None
 

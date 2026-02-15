@@ -1,0 +1,111 @@
+/* A terrible theme, do not use */
+
+Screen {
+    background: magenta;
+    color: yellow;
+    height: 100%;
+    width: 100%;
+}
+
+#ascii-art {
+    text-align: right;
+    color: ansi_bright_red;
+    padding: 0 0;
+    text-style: bold italic;
+}
+
+#footer {
+    text-align: left;
+    color: ansi_bright_blue;
+    text-style: underline;
+}
+
+.header { 
+    padding: 2 2 2 2;
+    background: cyan;
+    color: black;
+}
+
+.footer { 
+    padding: 0 1 2 0;
+    background: ansi_bright_green;
+    color: ansi_bright_magenta;
+}
+
+.list-view-state {
+    background: ansi_bright_yellow;
+    color: red;
+}
+
+/* Thread lists */
+.post-row {
+    height: 2;
+    color: ansi_bright_cyan;
+}
+
+.col-emoji {
+    width: 5;
+    color: ansi_bright_magenta;
+}
+
+.col-subreddit {
+    width: 20;
+    color: ansi_bright_yellow;
+    text-style: bold;
+}
+
+.col-title {
+    width: 1fr;
+    color: ansi_bright_red;
+    text-style: italic;
+}
+
+.col-meta {
+    width: 10;
+    color: ansi_bright_green;
+    text-style: underline;
+}
+
+/* Post viewer */
+.post-detail-body {
+    height: 100%;
+    width: 100%;
+    padding: 2 3;
+    background: ansi_bright_blue;
+    color: ansi_bright_white;
+}
+
+.nostyle {
+    display: block;
+    color: ansi_bright_red;
+    text-style: bold;
+}
+
+.post-image {
+    height: auto;
+    max-width: 90%;
+    max-height: 70%;
+    align: right top;
+    content-align: center middle;
+    margin: 2 1;
+    border: ansi_bright_yellow;
+}
+
+.post-image-container {
+    align: left middle;
+    padding: 2 2;
+    background: ansi_bright_red;
+}
+
+.post-content-body {
+    padding: 1 1;
+    color: ansi_bright_green;
+    text-style: italic bold;
+}
+
+.post-image-url, .post-external-link-url, .post-url {
+    text-style: blink underline;
+    align: left top;
+    padding: 1 1;
+    color: ansi_bright_magenta;
+}

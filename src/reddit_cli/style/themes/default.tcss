@@ -1,3 +1,5 @@
+/* Default, stylish theme */
+
 Screen {
     background: black;
     color: white;
