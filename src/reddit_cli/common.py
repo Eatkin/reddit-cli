@@ -27,6 +27,7 @@ class RedditPost:
     subreddit: str
     content_raw: str
     content_clean: str
+    external_url: Optional[str] = None
     image_url: Optional[str] = None
 
 @dataclass

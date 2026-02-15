@@ -80,7 +80,7 @@ Screen {
     padding: 0;
 }
 
-.post-image-url {
+.post-image-url, .post-external-link-url, .post-url {
     text-style: italic;
     align: center middle;
     padding: 1 0;

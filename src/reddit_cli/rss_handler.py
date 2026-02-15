@@ -39,6 +39,21 @@ class RSSHandler:
         text = re.sub(r"\n{3,}", "\n\n", text)
 
         return text.strip()
+    
+    @staticmethod
+    def _extract_external_url(content: str) -> Optional[str]:
+        """External URLs have placeholder text [link] so can be easily found"""
+        soup = BeautifulSoup(content, "html.parser")
+
+        link_tag = soup.find("a", text="[link]")
+        external_url = str(link_tag["href"]) if link_tag else None
+
+        # Defaults to the link to the post
+        if external_url and "reddit.com" in external_url:
+            return None
+
+        return external_url
+
 
     @staticmethod
     def _extract_image_url(content: str) -> Optional[str]:
@@ -82,6 +97,7 @@ class RSSHandler:
                 content_raw=content,
                 content_clean=self._clean_content(content),
                 subreddit=entry.tags[0].term if 'tags' in entry else 'Unknown',
+                external_url=self._extract_external_url(content),
                 image_url=self._extract_image_url(content)
             )
             entries.append(entry_obj)

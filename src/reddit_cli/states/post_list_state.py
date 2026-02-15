@@ -37,7 +37,8 @@ class PostListState(BaseListViewState):
         )
 
     def on_enter(self) -> None:
-        # TODO: The list has no highlight when popping a post off the stack
+        if self.iterable_items:
+            return
         super().on_enter()
         self.posts = []
         self.loading = True
@@ -55,8 +56,16 @@ class PostListState(BaseListViewState):
     def _generate_display_items(self) -> List[Horizontal]:
         items = []
         for post in self.posts:
+            # Emoji for image/link/selfpost
+            if post.image_url:
+                emoji = "📷" 
+            elif post.external_url:
+                emoji = "🔗"
+            else:
+                emoji = "📰"
+
             data = PostRowData(
-                emoji="📷" if post.image_url else "",
+                emoji=emoji,
                 subreddit=post.subreddit,
                 title=post.title,
                 meta=""

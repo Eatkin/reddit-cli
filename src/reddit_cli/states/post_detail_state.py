@@ -59,10 +59,16 @@ class PostDetailState(BaseState):
 
     def _set_content(self) -> None:
         img_content = self.post.image_url is not None
+        external_url = self.post.external_url is not None
         components = []
+
+        components.append(Static(f"Link to post: {self.post.post_url}", classes="post-url"))
 
         if img_content:
             components.append(Static(f"Attached image URL: {self.post.image_url}", classes="post-image-url"))
+
+        if external_url:
+            components.append(Static(f"External link: {self.post.external_url}", classes="post-external-link-url"))
 
         components.append(Static(self.post.content_clean, classes="post-content-body"))
             
