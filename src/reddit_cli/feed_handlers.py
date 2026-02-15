@@ -1,10 +1,14 @@
+import json
 import re
 import textwrap
+from abc import ABC
+from abc import abstractmethod
 from typing import Dict, List
 from typing import Optional
-from urllib.parse import urlparse
 from urllib.parse import parse_qs
 from urllib.parse import urlencode
+from urllib.parse import urljoin
+from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
 import feedparser
@@ -14,24 +18,55 @@ from bs4 import BeautifulSoup
 from reddit_cli.common import RedditPost
 from reddit_cli.utils import get_random_user_agent
 
-class RSSHandler:
+class BaseHandler(ABC):
     FEED_CACHE: Dict[str, List[RedditPost]] = {}
 
-    def __init__(self, feed_url: str, force_reload: bool=False, limit: int = 100) -> None:
+    def __init__(self, feed_url: str, force_reload: bool=False, limit: int = 100, after: Optional[str] = None) -> None:
         # Parse and rebuild url with limit param
         parsed = urlparse(feed_url)
         query = parse_qs(parsed.query)  
         query['limit'] = [str(limit)]
+        if after is not None:
+            query['after'] = [after]
         new_query = urlencode(query, doseq=True)
         self.feed_url = urlunparse(parsed._replace(query=new_query))
 
-        self.raw_feed = None
-        self.feed = None
+        self.raw_feed: Optional[str] = None
+        self.feed: Optional[List[RedditPost]] = None
 
         # Check if our feed is already cached
         if self.feed_url in self.FEED_CACHE and not force_reload:
             self.feed = self.FEED_CACHE[self.feed_url]
 
+    def _fetch_feed(self) -> None:
+        """
+        Fetch the RSS feed for the given URL.
+        """
+        header = {
+            'User-Agent': get_random_user_agent()
+        }
+        response = requests.get(self.feed_url, headers=header)
+        # TODO: Handle this gracefully
+        response.raise_for_status()
+        self.raw_feed = response.text
+
+    @abstractmethod
+    def _parse_feed(self) -> None:
+        pass
+
+    def get_feed(self) -> List[RedditPost]:
+        """Return the parsed feed on demand, fetching and parsing if necessary."""
+        if self.feed is not None:
+            return self.feed
+        
+        self._fetch_feed()
+        self._parse_feed()
+        assert self.feed is not None, "This should never happen and is only here to satisfy type checkers."
+        # Cache the feed for future use
+        self.FEED_CACHE[self.feed_url] = self.feed
+        return self.feed
+
+class RSSHandler(BaseHandler):
     @staticmethod
     def _clean_content(content: str) -> str:
         soup = BeautifulSoup(content, "html.parser")
@@ -80,25 +115,15 @@ class RSSHandler:
         return None
 
 
-    def _fetch_feed(self) -> None:
-        """
-        Fetch the RSS feed for the given URL.
-        """
-        header = {
-            'User-Agent': get_random_user_agent()
-        }
-        response = requests.get(self.feed_url, headers=header)
-        # TODO: Handle this gracefully
-        response.raise_for_status()
-        self.raw_feed = feedparser.parse(response.text)
-
     def _parse_feed(self) -> None:
         """Parse the raw feed data into structured RedditPost objects."""
         if self.raw_feed is None:
             raise Exception("Feed not fetched yet. Call fetch_feed() first.")
+
+        feed = feedparser.parse(self.raw_feed)
         
         entries = []
-        for entry in self.raw_feed.entries:
+        for entry in feed.entries:
             # Content is the raw HTML content of the post
             content = entry.content[0].value
             entry_obj = RedditPost(
@@ -114,14 +139,29 @@ class RSSHandler:
         
         self.feed = entries
 
-    def get_feed(self) -> List[RedditPost]:
-        """Return the parsed feed on demand, fetching and parsing if necessary."""
-        if self.feed is not None:
-            return self.feed
+class JSONHandler(BaseHandler):
+
+    REDDIT_BASE_URL = "https://www.reddit.com"
+
+    def _parse_feed(self) -> None:
+        """Parse raw JSON into structured RedditPost objects."""
+        if self.raw_feed is None:
+            raise Exception("Feed not fetched yet. Call fetch_feed() first.")
+
+        feed = json.loads(self.raw_feed).get('data', {}).get('children', [])
+
+        entries = []
+        for entry in feed:
+            data = entry['data']
+            entry_obj = RedditPost(
+                title=data['title'],
+                post_url=urljoin(self.REDDIT_BASE_URL, data['permalink']),
+                content_raw=data['selftext_html'],
+                content_clean=data['selftext'],
+                subreddit=data['subreddit'],
+                external_url=data.get('url_overridden_by_dest'),
+                image_url=data.get('url_overridden_by_dest') if data.get('is_reddit_media_domain') else None
+            )
+            entries.append(entry_obj)
         
-        self._fetch_feed()
-        self._parse_feed()
-        assert self.feed is not None, "This should never happen and is only here to satisfy type checkers."
-        # Cache the feed for future use
-        self.FEED_CACHE[self.feed_url] = self.feed
-        return self.feed
+        self.feed = entries

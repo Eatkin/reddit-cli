@@ -8,13 +8,15 @@ from reddit_cli.common import FooterMetadata
 from reddit_cli.common import HeaderMetadata
 from reddit_cli.common import PostRowData
 from reddit_cli.common import RedditPost
-from reddit_cli.rss_handler import RSSHandler
+from reddit_cli.feed_handlers import BaseHandler
+from reddit_cli.feed_handlers import JSONHandler
+from reddit_cli.feed_handlers import RSSHandler
 from reddit_cli.states.common import BaseListViewState
 from reddit_cli.states.state_stack import StateStack
 from reddit_cli.states.post_detail_state import PostDetailState
 
 
-async def fetch_feed_async(handler: RSSHandler) -> List[RedditPost]:
+async def fetch_feed_async(handler: BaseHandler) -> List[RedditPost]:
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, handler.get_feed)
 
@@ -46,7 +48,9 @@ class PostListState(BaseListViewState):
         asyncio.create_task(self._fetch_posts())
 
     async def _fetch_posts(self, force_reload: bool=False) -> None:
-        handler = RSSHandler(self.feed_config.url, force_reload=force_reload)
+        # Decide which handler to use
+        handler_class = RSSHandler if '.rss' in self.feed_config.url else JSONHandler
+        handler = handler_class(self.feed_config.url, force_reload=force_reload)
         self.posts = await fetch_feed_async(handler)
         self.iterable_items = self._generate_display_items()
         self.loading = False
