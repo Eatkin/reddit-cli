@@ -8,14 +8,13 @@ from textual.widgets import ListView
 from textual.widgets import Static
 from textual.reactive import reactive
 
-from reddit_cli.common import HeaderMetadata
 from reddit_cli.common import FooterMetadata
+from reddit_cli.common import HeaderMetadata
 from reddit_cli.states.base_state import BaseState
 from reddit_cli.states.state_stack import StateStack
 
 class BaseListViewState(BaseState):
 
-    BINDINGS = []
     who = reactive("BaseListViewState", recompose=True)
 
     def __init__(self, stack: StateStack):
