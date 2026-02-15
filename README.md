@@ -2,21 +2,35 @@
 
 A WIP terminal-based Reddit client built with Textual.  
 
-Browse subreddit feeds via RSS, navigate posts with Vim-style bindings, and view content directly in your terminal.
+Browse subreddit feeds via RSS or JSON, navigate posts with Vim-style bindings, and view content directly in your terminal.
 
-Works via Reddit RSS feeds to avoid paid API requirements.
+Works via Reddit feeds to avoid paid API requirements.
 
 Current state: functional.
 
+Planned features:
+- Lazy loading new posts when you scroll to bottom of a feed
+- Manual subreddit entry
+
 ---
 
-## Getting Your RSS Feed
+## Getting Your JSON/RSS Feed for Your Personal Frontpage
 
-Reddit provides a personal RSS feed for your subreddit subscriptions.
+Reddit provides a personal feed for your subreddit subscriptions.
 
 You can find them on the [feeds page](https://www.reddit.com/prefs/feeds).
 
 These are private feeds with an access token and the link should not be shared as the token can never be revoked.
+
+## Other Feeds
+
+You can get feeds for any subreddit by appending `/.rss` or `/.json` to the end of a url, e.g. `https://www.reddit.com/r/python/.json`
+
+Example feeds are included in `config.sample.yaml`.
+
+# JSON vs RSS
+
+Both types of feed are supported but JSON is superior as it includes much more information. I originally designed this for RSS, but this will likely be deprecated at a later date.
 
 ---
 
@@ -62,19 +76,19 @@ Example configuration:
 ```yaml
 feeds:
     - name: All
-    url: https://www.reddit.com/r/all/.rss
+    url: https://www.reddit.com/r/all/.json
 
     - name: reddit.com (time capsule)
-    url: https://www.reddit.com/r/reddit.com/.rss
+    url: https://www.reddit.com/r/reddit.com/.json
 
     - name: Python
-    url: https://www.reddit.com/r/python/.rss
+    url: https://www.reddit.com/r/python/.json
 
     - name: Linux
-    url: https://www.reddit.com/r/linux/.rss
+    url: https://www.reddit.com/r/linux/.json
 
     - name: Programming
-    url: https://www.reddit.com/r/programming/.rss
+    url: https://www.reddit.com/r/programming/.json
 
 theme: default
 ```
@@ -149,6 +163,8 @@ To create a custom theme:
 3. Modify styles
 4. Set in config.yaml:
 
+I have included one additional theme called 'terrible' as an example.
+
 ```yaml
 theme: mytheme
 ```
@@ -167,7 +183,7 @@ pyproject.toml             – Project metadata & dependencies
 
 src/reddit_cli/
     common.py              – Shared models and structures
-    rss_handler.py         – RSS parsing logic
+    feed_handlers.py       – Feed parsing logic
     utils.py               – Helper utilities
     style/
         themes/            – Textual CSS themes

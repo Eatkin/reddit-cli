@@ -1,17 +1,17 @@
 feeds:
   - name: All
-    url: https://www.reddit.com/r/all/.rss
+    url: https://www.reddit.com/r/all/.json
 
   - name: reddit.com (time capsule)
-    url: https://www.reddit.com/r/reddit.com/.rss
+    url: https://www.reddit.com/r/reddit.com/.json
 
   - name: Python
-    url: https://www.reddit.com/r/python/.rss
+    url: https://www.reddit.com/r/python/.json
 
   - name: Linux
-    url: https://www.reddit.com/r/linux/.rss
+    url: https://www.reddit.com/r/linux/.json
 
   - name: Programming
-    url: https://www.reddit.com/r/programming/.rss
+    url: https://www.reddit.com/r/programming/.json
 
 theme: default
