@@ -13,7 +13,9 @@ from reddit_cli.utils import get_random_user_agent
 class RSSHandler:
     FEED_CACHE: Dict[str, List[RedditPost]] = {}
 
-    def __init__(self, feed_url: str, force_reload: bool=False) -> None:
+    def __init__(self, feed_url: str, force_reload: bool=False, limit: int = 100) -> None:
+        if '?limit' not in feed_url:
+            feed_url += f"?limit={limit}"
         self.feed_url = feed_url
         self.raw_feed = None
         self.feed = None
