@@ -160,7 +160,8 @@ class JSONHandler(BaseHandler):
                 content_clean=data['selftext'],
                 subreddit=data['subreddit'],
                 external_url=data.get('url_overridden_by_dest'),
-                image_url=data.get('url_overridden_by_dest') if data.get('is_reddit_media_domain') else None
+                image_url=data.get('url_overridden_by_dest') if data.get('is_reddit_media_domain') else None,
+                meta={'name': data.get('name')} # Used for the 'after' query param for lazy loading
             )
             entries.append(entry_obj)
         

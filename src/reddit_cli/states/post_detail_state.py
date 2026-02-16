@@ -78,13 +78,9 @@ class PostDetailState(BaseState):
         self.content = VerticalScroll(*components, classes="post-detail-body")
 
     def compose(self) -> ComposeResult:
-        if self.header_metadata:
-            yield Static(self.header_metadata.content, id=self.header_metadata.id, classes=self.header_metadata.classes)
-        
+        yield Static(self.header_metadata.content, id=self.header_metadata.id, classes=self.header_metadata.classes)
         yield self.content
-
-        if self.footer_metadata:
-            yield Static(self.footer_metadata.content, id=self.footer_metadata.id, classes=self.footer_metadata.classes)
+        yield Static(self.footer_metadata.content, id=self.footer_metadata.id, classes=self.footer_metadata.classes)
 
     def handle_input(self, key: str) -> None:
         if key in ["h", "left"]:

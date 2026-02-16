@@ -1,5 +1,7 @@
 import os
 from dataclasses import dataclass
+from typing import Any
+from typing import Dict
 from typing import Optional
 
 from textual.containers import Horizontal
@@ -29,6 +31,7 @@ class RedditPost:
     content_clean: str
     external_url: Optional[str] = None
     image_url: Optional[str] = None
+    meta: Optional[Dict[str, Any]] = None
 
 @dataclass
 class Feed:
