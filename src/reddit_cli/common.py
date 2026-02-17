@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from dataclasses import field
 from typing import Any
 from typing import Dict
 from typing import Optional
@@ -31,7 +32,7 @@ class RedditPost:
     content_clean: str
     external_url: Optional[str] = None
     image_url: Optional[str] = None
-    meta: Optional[Dict[str, Any]] = None
+    meta: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Feed:
@@ -45,14 +46,13 @@ class PostRowData:
     emoji: str
     subreddit: str
     title: str
-    meta: str
+    meta: Optional[Dict[str, Any]] = None
 
     def to_container(self) -> Horizontal:
         container = Horizontal(
             Static(self.emoji, classes="col-emoji"),
             Static(self.subreddit, classes="col-subreddit"),
             Static(self.title, classes="col-title"),
-            Static(self.meta, classes="col-meta"),
             classes="post-row"
         )
         return container
@@ -83,7 +83,7 @@ REDDIT_CLI_ASCII_ART = """
  █████   █████▒▒██████ ▒▒████████▒▒████████ █████  ▒▒█████     ▒▒█████████  ███████████ █████
 ▒▒▒▒▒   ▒▒▒▒▒  ▒▒▒▒▒▒   ▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒▒▒ ▒▒▒▒▒    ▒▒▒▒▒       ▒▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒▒▒▒▒▒ ▒▒▒▒▒ 
 
-╔═════════════════════════════╗
-║ Reddit CLI — Powered by RSS ║
-╚═════════════════════════════╝
+╔══════════════════════════════════╗
+║ Reddit CLI — Powered by [s]RSS[/s] JSON ║
+╚══════════════════════════════════╝
 """.strip()

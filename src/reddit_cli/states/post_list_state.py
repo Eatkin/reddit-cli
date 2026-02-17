@@ -1,8 +1,11 @@
 import asyncio
+import logging
 from typing import Dict
 from typing import List
+from typing import Optional
 
 from textual.containers import Horizontal
+from textual.widgets import ListItem
 from textual.widgets import Static
 
 from reddit_cli.common import Feed
@@ -32,6 +35,7 @@ class PostListState(BaseListViewState):
         super().__init__(stack)
         self.feed_config = feed_config
         self.posts: List[RedditPost] = []
+        self.after: Optional[str] = None
         self.id = "PostListState"
         self.header_metadata = HeaderMetadata(
             content=feed_config.name,
@@ -52,7 +56,6 @@ class PostListState(BaseListViewState):
         if self.iterable_items:
             return
         super().on_enter()
-        self.posts = []
         self.loading = True
         self.refresh()
         asyncio.create_task(self._fetch_posts())
@@ -61,26 +64,57 @@ class PostListState(BaseListViewState):
         # Decide which handler to use
         handler_class = RSSHandler if '.rss' in self.feed_config.url else JSONHandler
         handler = handler_class(self.feed_config.url, force_reload=force_reload)
+
         self.posts = await fetch_feed_async(handler)
-        self.iterable_items = self._generate_display_items()
+        # Set after attribute for lazy loading
+        if self.posts:
+            self.after = self.posts[-1].meta.get("name")
+
+        self.iterable_items = self._generate_display_items(self.posts)
         self.loading = False
+
         self._populate_listview()  
         self.refresh()
 
     async def _load_more_posts(self) -> None:
         handler_class = RSSHandler if '.rss' in self.feed_config.url else JSONHandler
-        handler = handler_class(self.feed_config.url, force_reload=True)
-        self.posts = await update_feed_async(handler)
-        new_items = self._generate_display_items()
+        if handler_class == RSSHandler:
+            logging.info("Loading more posts not allowed for RSS feeds")
+            return
+
+        if not self.iterable_items:
+            logging.info("Cannot load more posts, none have been loaded in the first place!")
+
+        if not self.after:
+            logging.info("Cannot load more posts, final post item has no meta.name attribute")
+            return
+
+        handler = handler_class(self.feed_config.url, force_reload=True, after=self.after)
+
+        new_posts = await update_feed_async(handler)
+        if new_posts:
+            self.after = new_posts[-1].meta.get("name")
+        new_items = self._generate_display_items(new_posts)
+
+        self.posts.extend(new_posts)
         self.iterable_items.extend(new_items)
         self.loading = False
-        self._populate_listview()  
+
+        list_items = [
+            ListItem(Static(item)) if isinstance(item, str)
+            else ListItem(item)
+            for item in new_items
+        ]
+
+        if self.list_view is not None:
+            self.list_view.extend(list_items)
+
         self.refresh()
         self._update_footer()
 
-    def _generate_display_items(self) -> List[Horizontal]:
+    def _generate_display_items(self, posts: List[RedditPost]) -> List[Horizontal]:
         items = []
-        for post in self.posts:
+        for post in posts:
             # Emoji for image/link/selfpost
             if post.image_url:
                 emoji = "📷" 
@@ -93,7 +127,7 @@ class PostListState(BaseListViewState):
                 emoji=emoji,
                 subreddit=post.subreddit,
                 title=post.title,
-                meta=""
+                meta=post.meta
             )
             items.append(data.to_container())
         return items
@@ -101,7 +135,7 @@ class PostListState(BaseListViewState):
     def _update_footer(self) -> None:
         # Check if we're at the bottom and update texts
         footer = self.query_one("#post-list-footer", Static)
-        if self.cursor == len(self.iterable_items):
+        if self.cursor == len(self.iterable_items) - 1:
             footer.update(self.footer_text['bottom'])
         else:
             footer.update(self.footer_text['default'])
@@ -122,6 +156,6 @@ class PostListState(BaseListViewState):
 
         self._update_footer()
 
-        if key == "ctrl+l":
+        if key == "ctrl+l" and self.cursor == len(self.iterable_items) - 1:
             self.loading = True
             asyncio.create_task(self._load_more_posts())

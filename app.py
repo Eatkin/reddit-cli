@@ -1,3 +1,5 @@
+from logging.config import dictConfig
+
 from textual.app import App
 from textual.events import Key
 
@@ -6,6 +8,36 @@ from reddit_cli.states.state_stack import StateStack
 from reddit_cli.states.feed_list_state import FeedListState
 from reddit_cli.style import THEMES
 from reddit_cli.utils import read_theme_from_yaml
+
+# Setup logging globally
+dictConfig({
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        "file_formatter": {
+            "format": "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
+
+    "handlers": {
+        "file_handler": {
+            "class": "logging.FileHandler",
+            "filename": "app.log",
+            "mode": "a",
+            "encoding": "utf-8",
+            "formatter": "file_formatter",
+            "level": "DEBUG",
+        },
+    },
+
+    "root": {
+        "handlers": ["file_handler"],
+        "level": "DEBUG",
+    },
+})
+
 
 _theme_name = read_theme_from_yaml(CONFIG_YAML_PATH)
 

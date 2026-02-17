@@ -21,18 +21,26 @@ from reddit_cli.utils import get_random_user_agent
 class BaseHandler(ABC):
     FEED_CACHE: Dict[str, List[RedditPost]] = {}
 
-    def __init__(self, feed_url: str, force_reload: bool=False, limit: int = 100, after: Optional[str] = None) -> None:
+    def __init__(self, feed_url: str, force_reload: bool=False, limit: int = 25, after: Optional[str] = None) -> None:
         # Parse and rebuild url with limit param
         self.feed_url = feed_url
         self.limit = limit
         self.after = after
+        self.base_url = self._extract_base_url(self.feed_url)
+        self._sanitise_feed_url()
 
         self.raw_feed: Optional[str] = None
         self.feed: Optional[List[RedditPost]] = None
 
         # Check if our feed is already cached
-        if self.feed_url in self.FEED_CACHE and not force_reload:
-            self.feed = self.FEED_CACHE[self.feed_url]
+        if self.base_url in self.FEED_CACHE and not force_reload:
+            self.feed = self.FEED_CACHE[self.base_url]
+
+    @staticmethod
+    def _extract_base_url(url: str) -> str:
+        parsed = urlparse(url)
+        stripped_url = urlunparse(parsed._replace(query="", fragment=""))
+        return str(stripped_url)
 
     def _sanitise_feed_url(self) -> None:
         # Prepares url with query parameters
@@ -57,24 +65,6 @@ class BaseHandler(ABC):
         response.raise_for_status()
         return response.text
 
-    def load_more_posts(self) -> List[RedditPost]:
-        """
-        Used when the feed has already been loaded to get more posts
-        Same as get_feed but will add to feed rather than replacing
-        """
-        # Should never happen but we'll check
-        if self.feed is None or self.raw_feed is None:
-            return []
-
-        self.raw_feed += self._fetch_feed()
-        new_posts = self._parse_feed()
-        self.feed += new_posts
-
-        self.FEED_CACHE[self.feed_url] = self.feed
-        # Set after attribute
-        self.after = self.feed[-1].meta.get('name') # type: ignore
-        return new_posts
-
     @abstractmethod
     def _parse_feed(self) -> List[RedditPost]:
         pass
@@ -86,12 +76,25 @@ class BaseHandler(ABC):
         
         self.raw_feed = self._fetch_feed()
         self.feed = self._parse_feed()
-        assert self.feed is not None, "This should never happen and is only here to satisfy type checkers."
         # Cache the feed for future use
-        self.FEED_CACHE[self.feed_url] = self.feed
-        # Set after attribute
-        self.after = self.feed[-1].meta.get('name') # type: ignore
+        self.FEED_CACHE[self.base_url] = self.feed
         return self.feed
+
+    def load_more_posts(self) -> List[RedditPost]:
+        """
+        Used when the feed has already been loaded to get more posts
+        Same as get_feed but will add to feed rather than replacing
+        """
+        self.raw_feed = self._fetch_feed()
+        new_posts = self._parse_feed()
+        # Get pre-existing posts
+        old_posts = self.FEED_CACHE.get(self.feed_url, [])
+        self.feed = old_posts + new_posts
+
+        # Update cache
+        self.FEED_CACHE[self.base_url] = self.feed
+        return new_posts
+
 
 class RSSHandler(BaseHandler):
     @staticmethod

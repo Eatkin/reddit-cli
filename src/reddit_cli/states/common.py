@@ -80,8 +80,8 @@ class BaseListViewState(BaseState):
     def _populate_listview(self) -> None:
         if self.list_view is None:
             self.list_view = ListView()
-        else:
-            self.list_view.clear()
+
+        self.list_view.clear()
 
         items = []
         for item in self.iterable_items:
@@ -91,6 +91,7 @@ class BaseListViewState(BaseState):
                 it = ListItem(item)
 
             items.append(it)
-        self.list_view.clear()
+
         self.list_view.extend(items)
+        self.list_view.refresh()
         self.list_view.index = min(self.cursor, len(self.iterable_items))
