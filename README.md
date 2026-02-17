@@ -6,12 +6,6 @@ Browse subreddit feeds via RSS or JSON, navigate posts with Vim-style bindings, 
 
 Works via Reddit feeds to avoid paid API requirements.
 
-Current state: functional.
-
-Planned features:
-- Lazy loading new posts when you scroll to bottom of a feed
-- Manual subreddit entry
-
 ---
 
 ## Getting Your JSON/RSS Feed for Your Personal Frontpage
@@ -133,6 +127,9 @@ Boss mode will alter the ASCII art to be work related, powered by synergy! It al
 - Enter – View post
 - h / ← – Go back
 - r – Refresh feed
+
+At the bottom of the feed:
+- Ctrl+L – Load more posts
 
 ### Post Detail
 
