@@ -27,11 +27,17 @@ def read_feeds_from_yaml(file_path: str) -> List[Feed]:
 
     feeds = []
     for feed_data in data.get('feeds', []):
-        try:
-            feeds.append(Feed(name=feed_data['name'], url=feed_data['url']))
-        except KeyError as e:
-            print(f"Skipping feed due to missing key: {e}. Feed data: {feed_data}")
+        url = feed_data.get('url')
+        if url is None:
+            print(f"Feed skipped due to missing url key: {feed_data}")
             continue
+        # Silently replace .rss with .json
+        url = url.replace('.rss', '.json')
+        # Check to make sure is valid feed
+        if ".json" not in url:
+            print(f"Feed is not recognised as a valid rss/json feed: {url}")
+            continue
+        feeds.append(Feed(name=feed_data.get('name', url), url=url))
 
     return feeds
 

@@ -93,4 +93,4 @@ class BaseListViewState(BaseState):
             items.append(it)
         self.list_view.clear()
         self.list_view.extend(items)
-        self.list_view.index = self.cursor
+        self.list_view.index = min(self.cursor, len(self.iterable_items))

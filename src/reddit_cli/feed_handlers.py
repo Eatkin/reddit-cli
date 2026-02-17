@@ -23,13 +23,9 @@ class BaseHandler(ABC):
 
     def __init__(self, feed_url: str, force_reload: bool=False, limit: int = 100, after: Optional[str] = None) -> None:
         # Parse and rebuild url with limit param
-        parsed = urlparse(feed_url)
-        query = parse_qs(parsed.query)  
-        query['limit'] = [str(limit)]
-        if after is not None:
-            query['after'] = [after]
-        new_query = urlencode(query, doseq=True)
-        self.feed_url = urlunparse(parsed._replace(query=new_query))
+        self.feed_url = feed_url
+        self.limit = limit
+        self.after = after
 
         self.raw_feed: Optional[str] = None
         self.feed: Optional[List[RedditPost]] = None
@@ -38,20 +34,49 @@ class BaseHandler(ABC):
         if self.feed_url in self.FEED_CACHE and not force_reload:
             self.feed = self.FEED_CACHE[self.feed_url]
 
-    def _fetch_feed(self) -> None:
+    def _sanitise_feed_url(self) -> None:
+        # Prepares url with query parameters
+        parsed = urlparse(self.feed_url)
+        query = parse_qs(parsed.query)  
+        query['limit'] = [str(self.limit)]
+        if self.after is not None:
+            query['after'] = [self.after]
+        new_query = urlencode(query, doseq=True)
+        self.feed_url = urlunparse(parsed._replace(query=new_query))
+
+    def _fetch_feed(self) -> str:
         """
         Fetch the RSS feed for the given URL.
         """
         header = {
             'User-Agent': get_random_user_agent()
         }
+        self._sanitise_feed_url()
         response = requests.get(self.feed_url, headers=header)
         # TODO: Handle this gracefully
         response.raise_for_status()
-        self.raw_feed = response.text
+        return response.text
+
+    def load_more_posts(self) -> List[RedditPost]:
+        """
+        Used when the feed has already been loaded to get more posts
+        Same as get_feed but will add to feed rather than replacing
+        """
+        # Should never happen but we'll check
+        if self.feed is None or self.raw_feed is None:
+            return []
+
+        self.raw_feed += self._fetch_feed()
+        new_posts = self._parse_feed()
+        self.feed += new_posts
+
+        self.FEED_CACHE[self.feed_url] = self.feed
+        # Set after attribute
+        self.after = self.feed[-1].meta.get('name') # type: ignore
+        return new_posts
 
     @abstractmethod
-    def _parse_feed(self) -> None:
+    def _parse_feed(self) -> List[RedditPost]:
         pass
 
     def get_feed(self) -> List[RedditPost]:
@@ -59,11 +84,13 @@ class BaseHandler(ABC):
         if self.feed is not None:
             return self.feed
         
-        self._fetch_feed()
-        self._parse_feed()
+        self.raw_feed = self._fetch_feed()
+        self.feed = self._parse_feed()
         assert self.feed is not None, "This should never happen and is only here to satisfy type checkers."
         # Cache the feed for future use
         self.FEED_CACHE[self.feed_url] = self.feed
+        # Set after attribute
+        self.after = self.feed[-1].meta.get('name') # type: ignore
         return self.feed
 
 class RSSHandler(BaseHandler):
@@ -115,7 +142,7 @@ class RSSHandler(BaseHandler):
         return None
 
 
-    def _parse_feed(self) -> None:
+    def _parse_feed(self) -> List[RedditPost]:
         """Parse the raw feed data into structured RedditPost objects."""
         if self.raw_feed is None:
             raise Exception("Feed not fetched yet. Call fetch_feed() first.")
@@ -137,13 +164,13 @@ class RSSHandler(BaseHandler):
             )
             entries.append(entry_obj)
         
-        self.feed = entries
+        return entries
 
 class JSONHandler(BaseHandler):
 
     REDDIT_BASE_URL = "https://www.reddit.com"
 
-    def _parse_feed(self) -> None:
+    def _parse_feed(self) -> List[RedditPost]:
         """Parse raw JSON into structured RedditPost objects."""
         if self.raw_feed is None:
             raise Exception("Feed not fetched yet. Call fetch_feed() first.")
@@ -165,4 +192,4 @@ class JSONHandler(BaseHandler):
             )
             entries.append(entry_obj)
         
-        self.feed = entries
+        return entries
