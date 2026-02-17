@@ -61,7 +61,6 @@ class BaseHandler(ABC):
         }
         self._sanitise_feed_url()
         response = requests.get(self.feed_url, headers=header)
-        # TODO: Handle this gracefully
         response.raise_for_status()
         return response.text
 

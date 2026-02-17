@@ -32,6 +32,9 @@ class BaseListViewState(BaseState):
         if self.header_metadata is not None:
             yield Static(self.header_metadata.content, id=self.header_metadata.id, classes=self.header_metadata.classes)
 
+        # Yield an empty error with noclass
+        yield Static("Oh no! An error occurred!", classes="nostyle")
+
         if self.list_view is None:
             items = []
 

@@ -4,6 +4,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+from requests.exceptions import HTTPError
 from textual.containers import Horizontal
 from textual.widgets import ListItem
 from textual.widgets import Static
@@ -65,7 +66,23 @@ class PostListState(BaseListViewState):
         handler_class = RSSHandler if '.rss' in self.feed_config.url else JSONHandler
         handler = handler_class(self.feed_config.url, force_reload=force_reload)
 
-        self.posts = await fetch_feed_async(handler)
+        try:
+            self.posts = await fetch_feed_async(handler)
+        except HTTPError as e:
+            logging.error(str(e))
+            response = e.response
+            status_code = response.status_code
+            reason = response.reason
+            # Set styling of the error
+            error_msg = self.query_one(".nostyle", Static)
+            # Adjust classes!
+            error_msg.set_class(True, "error-message")
+            error_msg.set_class(False, "nostyle")
+            error_msg.update(f"Oh no! An error occurred! Status code: {status_code}, reason: {reason}")
+            self.loading = False
+            self.refresh()
+            return
+
         # Set after attribute for lazy loading
         if self.posts:
             self.after = self.posts[-1].meta.get("name")

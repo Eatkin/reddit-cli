@@ -87,3 +87,8 @@ Screen {
     align: center middle;
     padding: 1 0;
 }
+
+.error-message {
+    color: red;
+    padding: 0 1;
+}
