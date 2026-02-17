@@ -58,7 +58,7 @@ class PostDetailState(BaseState):
         self._set_content()
 
     def _set_content(self) -> None:
-        img_content = self.post.image_url is not None
+        img_content = self.post.image_url is not None and not self.stack.boss_mode
         external_url = self.post.external_url is not None
         components = []
 

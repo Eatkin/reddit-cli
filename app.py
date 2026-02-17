@@ -1,3 +1,4 @@
+import sys
 from logging.config import dictConfig
 
 from textual.app import App
@@ -45,9 +46,9 @@ class RedditCLIApp(App[None]):
     
     CSS_PATH = THEMES.get(_theme_name, THEMES["default"])
 
-    def __init__(self) -> None:
+    def __init__(self, boss_mode: bool = False) -> None:
         super().__init__()
-        self.stack = StateStack(self)
+        self.stack = StateStack(self, boss_mode=boss_mode)
 
     def on_mount(self) -> None:
         # Push first state
@@ -60,7 +61,9 @@ class RedditCLIApp(App[None]):
                 self.exit()
 
 def main() -> None:
-    app = RedditCLIApp()
+    clargs = sys.argv
+    boss_mode =  clargs[-1] == "--boss-mode"
+    app = RedditCLIApp(boss_mode=boss_mode)
     app.run(inline=True)
 
 if __name__ == "__main__":

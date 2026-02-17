@@ -4,6 +4,7 @@ from reddit_cli.common import CONFIG_YAML_PATH
 from reddit_cli.common import Feed
 from reddit_cli.common import FooterMetadata
 from reddit_cli.common import HeaderMetadata
+from reddit_cli.common import BOSS_MODE_ASCII_ART
 from reddit_cli.common import REDDIT_CLI_ASCII_ART
 from reddit_cli.states.common import BaseListViewState
 from reddit_cli.states.custom_sub_state import CustomSubState
@@ -22,7 +23,8 @@ class FeedListState(BaseListViewState):
         self.iterable_items.append("Enter custom subreddit")
         self.cursor: int = 0
         self.id = "FeedListState"
-        self.header_metadata = HeaderMetadata(content=REDDIT_CLI_ASCII_ART, id="ascii-art")
+        header_art = BOSS_MODE_ASCII_ART if self.stack.boss_mode else REDDIT_CLI_ASCII_ART
+        self.header_metadata = HeaderMetadata(content=header_art, id="ascii-art")
         self.footer_metadata = FooterMetadata(content="\[j/k] or \[up/down] to navigate, \[enter] to select, \[q] to quit", classes="footer")
     
     def handle_input(self, key: str) -> None:

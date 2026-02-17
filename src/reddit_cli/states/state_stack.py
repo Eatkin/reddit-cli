@@ -3,7 +3,8 @@ from textual.app import App
 from reddit_cli.states.base_state import BaseState
 
 class StateStack:
-    def __init__(self, app: App[None]) -> None:
+    def __init__(self, app: App[None], boss_mode: bool = False) -> None:
+        self.boss_mode = boss_mode
         self.stack: list[BaseState] = []
         self.app = app
 
