@@ -103,6 +103,14 @@ You can add or remove feeds as you like.
 python app.py
 ```
 
+**OPTIONAL:** Boss Mode! Want to browse Reddit from your Terminal without having REDDIT CLI splashed across the top of the page? Use `--boss-mode`
+
+```bash
+python app.py --boss-mode
+```
+
+Boss mode will alter the ASCII art to be work related, powered by synergy! It also does not load any images.
+
 ---
 
 ## Controls
