@@ -195,3 +195,13 @@ src/reddit_cli/
     states/                – States/State Manager
         ...
 ```
+
+---
+
+## What Does It Look Like?
+
+![Feeds List](https://github.com/Eatkin/reddit-cli/blob/main/etc/Screenshot_2026-02-18_05-12-11.png?raw=true)
+
+![Posts List](https://github.com/Eatkin/reddit-cli/blob/main/etc/Screenshot_2026-02-18_05-12-28.png?raw=true)
+
+![Post View](https://github.com/Eatkin/reddit-cli/blob/main/etc/Screenshot_2026-02-18_05-13-19.png?raw=true)
