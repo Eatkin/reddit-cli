@@ -1,6 +1,6 @@
 # Reddit CLI
 
-A WIP terminal-based Reddit client built with Textual.  
+A lightweight terminal-based Reddit client built with Textual, using JSON feeds to serve threads.
 
 Browse subreddit feeds via RSS or JSON, navigate posts with Vim-style bindings, and view content directly in your terminal.
 
