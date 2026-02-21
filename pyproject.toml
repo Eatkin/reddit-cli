@@ -34,6 +34,9 @@ dev = [
     "flake8-comprehensions",
 ]
 
+[project.scripts]
+reddit = "reddit_cli.app:main"
+
 [build-system]
 requires = ["setuptools>=65.0", "wheel"]
 build-backend = "setuptools.build_meta"
