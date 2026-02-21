@@ -1,3 +1,4 @@
+import os
 import sys
 from logging.config import dictConfig
 
@@ -11,6 +12,7 @@ from reddit_cli.style import THEMES
 from reddit_cli.utils import read_theme_from_yaml
 
 # Setup logging globally
+LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.log")
 dictConfig({
     "version": 1,
     "disable_existing_loggers": False,
@@ -25,7 +27,7 @@ dictConfig({
     "handlers": {
         "file_handler": {
             "class": "logging.FileHandler",
-            "filename": "app.log",
+            "filename": LOG_PATH,
             "mode": "a",
             "encoding": "utf-8",
             "formatter": "file_formatter",
